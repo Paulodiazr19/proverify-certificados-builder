@@ -397,20 +397,20 @@ export const generatePDF = async ({ datos, causas, procedimientos, demandas, fal
                         <div class="info-fields">
                             <div class="field">
                                 <label for="nombre">Nombre Completo:</label>
-                                <input type="text" id="nombre" value="Juan Alberto Pérez González">
+                                <input type="text" id="nombre" value="${datos.nombre || 'No especificado'}">
                             </div>
                             <div class="field">
                                 <label for="rut">RUT:</label>
-                                <input type="text" id="rut" value="12.345.678-9">
+                                <input type="text" id="rut" value="${datos.rut || 'No especificado'}">
                             </div>
                              <div class="field">
                                 <label for="edad">Edad:</label>
-                                <input type="text" id="edad" value="45 años">
+                                <input type="text" id="edad" value="${datos.edad || 'No especificado'} años">
                             </div>
                         </div>
                         <div class="risk-indicator">
                             <div class="risk-score">65</div>
-                            <div class="risk-label">Riesgo Medio</div>
+                            <div class="risk-label">${datos.riesgo || 'No especificado'}</div>
                         </div>
                     </div>
                     <p class="emission-date" id="fecha-emision"></p>
@@ -429,27 +429,19 @@ export const generatePDF = async ({ datos, causas, procedimientos, demandas, fal
                             </tr>
                         </thead>
                         <tbody>
+                            ${procedimientos.length > 0 ? procedimientos.map(proc => `
                             <tr>
-                                <td>CIV-001</td>
-                                <td>Causa Civil</td>
-                                <td>En Tramitación</td>
-                                <td>15/03/2022</td>
-                                <td>1er Juzgado Civil de Santiago</td>
+                                <td>${proc.id || 'No especificado'}</td>
+                                <td>${proc.tipo || 'No especificado'}</td>
+                                <td>${proc.estado || 'No especificado'}</td>
+                                <td>${proc.inicio || 'No especificado'}</td>
+                                <td>${proc.tribunal || 'No especificado'}</td>
                             </tr>
+                            `).join('') : `
                             <tr>
-                                <td>LAB-001</td>
-                                <td>Causa Laboral</td>
-                                <td>Terminado</td>
-                                <td>02/08/2021</td>
-                                <td>2do Juzgado de Letras del Trabajo</td>
+                                <td colspan="5"><em>No hay procedimientos judiciales registrados.</em></td>
                             </tr>
-                            <tr>
-                                <td>PEN-001</td>
-                                <td>Causa Penal</td>
-                                <td>Fallido</td>
-                                <td>10/11/2020</td>
-                                <td>7mo Juzgado de Garantía de Santiago</td>
-                            </tr>
+                            `}
                         </tbody>
                     </table>
                 </section>
@@ -467,27 +459,19 @@ export const generatePDF = async ({ datos, causas, procedimientos, demandas, fal
                             </tr>
                         </thead>
                         <tbody>
+                            ${demandas.length > 0 ? demandas.map(demanda => `
                             <tr>
-                                <td>DEM-012</td>
-                                <td>Arrendamiento</td>
-                                <td>Sí</td>
-                                <td>No Aplica</td>
-                                <td>$1.500.000</td>
+                                <td>${demanda.id || 'No especificado'}</td>
+                                <td>${demanda.materia || 'No especificado'}</td>
+                                <td>${demanda.demandado || 'No especificado'}</td>
+                                <td>${demanda.segundoDemandado || 'No Aplica'}</td>
+                                <td>${demanda.cuantia || 'No especificado'}</td>
                             </tr>
+                            `).join('') : `
                             <tr>
-                                <td>DEM-013</td>
-                                <td>Indemnización</td>
-                                <td>Sí</td>
-                                <td>Sociedad XYZ Ltda.</td>
-                                <td>$15.000.000</td>
+                                <td colspan="5"><em>No hay demandas registradas.</em></td>
                             </tr>
-                            <tr>
-                                <td>DEM-014</td>
-                                <td>Cobranza</td>
-                                <td>Sí</td>
-                                <td>No Aplica</td>
-                                <td>$850.000</td>
-                            </tr>
+                            `}
                         </tbody>
                     </table>
                 </section>
@@ -535,24 +519,18 @@ export const generatePDF = async ({ datos, causas, procedimientos, demandas, fal
                             </tr>
                         </thead>
                         <tbody>
+                            ${fallos.length > 0 ? fallos.map(fallo => `
                             <tr>
-                                <td>FALL-001</td>
-                                <td>T-254-2021</td>
-                                <td>01/01/2020 - 31/07/2021</td>
-                                <td>Acoge demanda parcialmente.</td>
+                                <td>${fallo.id || 'No especificado'}</td>
+                                <td>${fallo.rol || 'No especificado'}</td>
+                                <td>${fallo.inicioRelacion && fallo.finRelacion ? `${fallo.inicioRelacion} - ${fallo.finRelacion}` : 'No Aplica'}</td>
+                                <td>${fallo.fallo || 'No especificado'}</td>
                             </tr>
+                            `).join('') : `
                             <tr>
-                                <td>FALL-002</td>
-                                <td>C-1234-2022</td>
-                                <td>No Aplica</td>
-                                <td>Rechaza demanda.</td>
+                                <td colspan="4"><em>No hay fallos registrados.</em></td>
                             </tr>
-                            <tr>
-                                <td>FALL-003</td>
-                                <td>J-58-2020</td>
-                                <td>No Aplica</td>
-                                <td>Condena en costas.</td>
-                            </tr>
+                            `}
                         </tbody>
                     </table>
                 </section>
@@ -622,7 +600,7 @@ export const generatePDF = async ({ datos, causas, procedimientos, demandas, fal
 
   try {
     // Convertir HTML a canvas
-    const canvas = await html2canvas(tempDiv.querySelector('#certificate') as HTMLElement, {
+    const canvas = await html2canvas(tempDiv.querySelector('.certificate-container') as HTMLElement, {
       scale: 2,
       useCORS: true,
       allowTaint: true,
