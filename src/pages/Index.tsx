@@ -6,7 +6,8 @@ import ProcedimientosJudiciales, { ProcedimientoJudicial } from "@/components/Pr
 import Demandas, { Demanda } from "@/components/Demandas";
 import Fallos, { Fallo } from "@/components/Fallos";
 import VistaPrevia from "@/components/VistaPrevia";
-import { Eye } from "lucide-react";
+import { generatePDF } from "@/components/PDFGenerator";
+import { Eye, FileDown } from "lucide-react";
 
 const defaultDP: DatosPersonalesData = {
   nombre: "",
@@ -23,6 +24,25 @@ export default function Index() {
   const [demandas, setDemandas] = useState<Demanda[]>([]);
   const [fallos, setFallos] = useState<Fallo[]>([]);
   const [openVistaPrevia, setOpenVistaPrevia] = useState(false);
+  const [generandoPDF, setGenerandoPDF] = useState(false);
+
+  const handleGenerarPDF = async () => {
+    setGenerandoPDF(true);
+    try {
+      await generatePDF({
+        datos,
+        causas,
+        procedimientos,
+        demandas,
+        fallos
+      });
+    } catch (error) {
+      console.error('Error al generar PDF:', error);
+      alert('Error al generar el PDF. Por favor, intenta nuevamente.');
+    } finally {
+      setGenerandoPDF(false);
+    }
+  };
 
   return (
     <div className="font-montserrat min-h-screen w-full bg-gradient-to-tr from-azul-900 via-azul-800 to-naranja-500 py-12">
@@ -49,14 +69,22 @@ export default function Index() {
           <Demandas demandas={demandas} setDemandas={setDemandas} />
           <Fallos fallos={fallos} setFallos={setFallos} />
         </section>
-        {/* Vista Previa */}
-        <div className="flex justify-center mt-10">
+        {/* Botones */}
+        <div className="flex justify-center gap-4 mt-10">
           <button
             className="flex items-center gap-2 bg-naranja-500 hover:bg-azul-800 text-white font-bold px-10 py-4 rounded-2xl shadow-lg transition hover:scale-105 text-lg"
             onClick={() => setOpenVistaPrevia(true)}
           >
             <Eye size={24} className="mr-1" />
             Vista Previa
+          </button>
+          <button
+            className="flex items-center gap-2 bg-azul-800 hover:bg-naranja-500 text-white font-bold px-10 py-4 rounded-2xl shadow-lg transition hover:scale-105 text-lg disabled:opacity-50 disabled:cursor-not-allowed"
+            onClick={handleGenerarPDF}
+            disabled={generandoPDF}
+          >
+            <FileDown size={24} className="mr-1" />
+            {generandoPDF ? 'Generando...' : 'Generar PDF'}
           </button>
         </div>
       </div>
